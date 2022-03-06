@@ -2,22 +2,14 @@ import React, { Component } from 'react';
 import {
     Dimensions,
     Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    ScrollView,
-    StyleSheet, 
     Text, 
-    TextInput,
     TouchableOpacity, 
     View,
-    SafeAreaView,
-    ActivityIndicator,
-    FlatList, 
+    FlatList,
+    RefreshControl, 
 } from 'react-native';
-import { FlatGrid } from 'react-native-super-grid';
-import { Avatar, Button, Card, Title, Paragraph, Surface } from 'react-native-paper';
+import { Surface } from 'react-native-paper';
 import Counter from "react-native-counters";
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 
 import colors from '../utils/colors';
@@ -37,6 +29,7 @@ class CartScreen extends Component {
         cartProducts: [],
         cart: [],
         total: 0,
+        refreshing: false,
     }
 
     async componentDidMount() {
@@ -46,7 +39,6 @@ class CartScreen extends Component {
 
     _getCart = async () => {
         let cart = await AsyncStorage.getItem('cart');
-        console.log('cart', cart)
         let cartArray = []
         if (cart != null) {
             cartArray = JSON.parse(cart);
@@ -73,9 +65,16 @@ class CartScreen extends Component {
         });
         this.setState({
             cartProducts,
-            total
+            total,
+            refreshing: false
+        }, () => {})
+    }
+
+    _onRefresh = () => {
+        this.setState({
+            refreshing: true
         }, () => {
-            console.log('products: ', this.state.cartProducts)
+            this._getCart();
         })
     }
 
@@ -85,6 +84,13 @@ class CartScreen extends Component {
                 data={this.state.cartProducts}
                 renderItem={this._renderProductItem}
                 ListEmptyComponent={this._renderListEmptyComponent}
+                refreshControl={
+                    <RefreshControl
+                        colors={["#9Bd35A", "#689F38"]}
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh} 
+                    />
+                }
             />
         );
     }
@@ -94,7 +100,7 @@ class CartScreen extends Component {
     }
 
     onChange(number, type) {
-        console.log('quantity: ', number);
+        // console.log('quantity: ', number);
     }
 
     _renderProductItem = ({item, index}) => {
@@ -185,7 +191,7 @@ class CartScreen extends Component {
                             alignItems: 'center',
                             alignContent: 'center',
                             justifyContent: 'center',
-                            backgroundColor: '#FF6464'
+                            backgroundColor: '#FC4F4F'
                         }}
                             onPress={() => {
 
@@ -220,13 +226,16 @@ class CartScreen extends Component {
     }
     _renderTotalSection = () => {
         return (
-            <View>
+            <View style={{
+                paddingTop: 10,
+            }}>
                 <View style={{
                     flexDirection: 'row',
                     paddingHorizontal: 20,
                 }}>
                     <Text style={{
                         flex: 1,
+                        color: colors.black,
                         fontSize: 20,
                         fontWeight: 'bold',
                     }}>
@@ -273,12 +282,13 @@ class CartScreen extends Component {
                 flex: 1,
             }}>
                 <View style={{
-                    flex: 8
+                    flex: 9
                 }}>
                     {this._renderProducts()}
                 </View>
                 <View style={{
-                    flex: 2
+                    flex: 2,
+                    backgroundColor: colors.white,
                 }}>
                 {this._renderTotalSection()}
                 </View>

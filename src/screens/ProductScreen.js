@@ -2,21 +2,18 @@ import React, { Component } from 'react';
 import {
     Dimensions,
     Image,
-    ImageBackground,
-    KeyboardAvoidingView,
     ScrollView,
     StyleSheet, 
     Text, 
-    TextInput,
     TouchableOpacity, 
     View,
-    SafeAreaView,
-    ActivityIndicator,
-    FlatList, 
+    FlatList,
+    StatusBar, 
 } from 'react-native';
 import { FlatGrid } from 'react-native-super-grid';
 import { Avatar, Button, Card, Title, Paragraph, Surface } from 'react-native-paper';
 import { SearchBar } from 'react-native-elements';
+import SearchHeader from 'react-native-search-header';
 
 import colors from '../utils/colors';
 import Images from '../images';
@@ -28,17 +25,19 @@ class ProductScreen extends Component {
 
     constructor(Props) {
         super(Props);
+        this.searchHeaderRef = React.createRef();
     }
 
     state = {
-        products: products
+        products: products,
+        filteredProducts: products,
     }
 
     _renderProducts = () => {
         return (
             <FlatList
                 itemDimension={130}
-                data={this.state.products}
+                data={this.state.filteredProducts}
                 renderItem={this._renderProductItem}
                 ListEmptyComponent={this._renderListEmptyComponent}
             />
@@ -47,6 +46,22 @@ class ProductScreen extends Component {
 
     _getProductImage = (image) => {
         return image ? Images.products[image] : Images.products.default;
+    }
+
+    _searchProducts = (keyword) => {
+        const allProducts = this.state.products;
+        let filteredProducts = allProducts.filter(prod => {
+            if (prod.display_name.indexOf(keyword) > -1
+                || prod.brand.indexOf(keyword) > -1
+                || prod.category.indexOf(keyword) > -1) {
+                    return true;
+                }
+        });
+        if (filteredProducts.length > 0) {
+            this.setState({
+                filteredProducts
+            });
+        }
     }
 
     _renderProductItem = ({item, index}) => {
@@ -126,25 +141,6 @@ class ProductScreen extends Component {
         )
     }
 
-    // _renderFooter = () => {
-    //     let { currentPage, lastPage, products } = this.state;
-    //     let endData = currentPage == lastPage;
-    //     if (endData && products.length > 0) {
-    //         return (
-    //             <View style={{width: '100%', paddingVertical: 15}}>
-    //                 <Text style={styles.listFilter}>
-    //                     {I18n.t('EndList')}
-    //                 </Text>
-    //             </View>
-    //         );
-    //     }
-    //     return (
-    //         this.state.isLoading && 
-    //         <ActivityIndicator
-    //             size="small"
-    //         />
-    //     );
-    // }
     _renderListEmptyComponent = () => {
         return (
             // !this.state.isLoading && 
@@ -166,37 +162,121 @@ class ProductScreen extends Component {
     }
 
     render() {
+        const self = this;
         return (
             <ScrollView contentContainerStyle={{flexGrow: 1}}>
                 <View>
                     {/* <Loader loading={this.state.isLoading} /> */}
-                    {/* <Carousel
-                        data={this.state.banners}
-                        renderItem={this._renderBanner}
-                        // autoplay={true}
-                        sliderWidth={width}
-                        itemWidth={width}
-                        layout={'default'}
-                        loop={true}
-                        containerCustomStyle={{ flex: 1 }}
-                        slideStyle={{ flex: 1 }}
-                        onSnapToItem={(index) => this.setState({ currentBannerIndex: index })}
+                    <StatusBar barStyle = 'light-content' />
+                    {/* <View style = { styles.status }/> */}
+                    <View style = { styles.header }>
+                        <Button
+                            title = 'Search'
+                            color = '#f5fcff'
+                            onPress = {() => this.searchHeaderRef.current.show()}
+                        />
+                    </View>
+                    <SearchHeader
+                        ref = { this.searchHeaderRef }
+                        placeholder = 'Search...'
+                        placeholderColor = 'gray'
+                        dropShadowed = { false }
+                        autoFocus = { false }
+                        visibleInitially = { true }
+                        persistent = { true }
+                        enableSuggestion = { true }
+                        entryAnimation = 'from-left-side'
+                        // topOffset = { 36 }
+                        iconColor = 'gray'
+                        iconImageComponents = {[{
+                            name: 'hide',
+                            customStyle: {
+                                tintColor: 'red'
+                            }
+                        }, {
+                            name: 'pin',
+                            customStyle: {
+                                tintColor: 'red'
+                            }
+                        }]}
+                        onClear = {() => {
+                            self.setState({
+                                filteredProducts: products
+                            })
+                        }}
+                        onEnteringSearch = {(event) => {
+                            self._searchProducts(event.nativeEvent.text);
+                        }}
+                        onSearch = {(event) => {
+                            self._searchProducts(event.nativeEvent.text);
+                        }}
+                        style = {{
+                            header: {
+                                height: 38,
+                                marginTop: 9,
+                                marginHorizontal: 9,
+                                borderRadius: 19,
+                                backgroundColor: '#fdfdfd'
+                            },
+                            input: {
+                                fontSize: 16,
+                                margin: 0,
+                                padding: 0,
+                                borderRadius: 0,
+                                backgroundColor: 'transparent'
+                            }
+                        }}
                     />
-                    {this._bannerPagination()}
-                    {this._renderHeader()} */}
-                    {/* <ErrorMessage 
-                        errorMessage={this.state.errorMessage}
-                        onClose={() => { this.setState({ errorMessage: '' }) }}
-                    />
-                    <SuccessMessage
-                        message={this.state.successMessage}
-                        onClose={() => { this.setState({ successMessage: '' }) }}
-                    /> */}
                     {this._renderProducts()}
                 </View>
             </ScrollView>
         )
     }
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        backgroundColor: '#f5fcff'
+    },
+    status: {
+        // zIndex: 10,
+        // elevation: 2,
+        width: width,
+        height: 36,
+        backgroundColor: colors.primary
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        width: width,
+        height: 59,
+        padding: 6,
+        backgroundColor: colors.primary
+    },
+    label: {
+        flexGrow: 1,
+        fontSize: 18,
+        fontWeight: '600',
+        textAlign: 'right',
+        paddingRight: 50,
+        marginVertical: 8,
+        paddingVertical: 3,
+        color: '#f5fcff',
+        backgroundColor: 'transparent'
+    },
+    button: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 280,
+        height: 40,
+        marginTop: 40,
+        borderRadius: 2,
+        backgroundColor: '#ff5722'
+    }
+});
 
 export default ProductScreen;

@@ -2,16 +2,10 @@ import React, { Component } from 'react';
 import {
     Dimensions,
     Image,
-    ImageBackground,
-    KeyboardAvoidingView,
     ScrollView,
-    StyleSheet, 
     Text, 
-    TextInput,
     TouchableOpacity, 
     View,
-    SafeAreaView,
-    ActivityIndicator, 
 } from 'react-native';
 import { Surface } from 'react-native-paper';
 import Counter from "react-native-counters";
@@ -52,7 +46,6 @@ class ProductDetailScreen extends Component {
     }
 
     onChange(number, type) {
-        console.log(number, type) // 1, + or -
         this.setState({
             quantity: number
         });
@@ -156,7 +149,6 @@ class ProductDetailScreen extends Component {
                         min={1}
                         onChange={this.onChange.bind(this)} 
                         buttonStyle={{
-                            // borderRadius: 200,
                             borderColor: '#FDB777',
                             padding: 1,
                         }}

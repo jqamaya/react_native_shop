@@ -48,7 +48,12 @@ const tabColor = (focused) => {
     
 const ProductNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName='Product'>
+    <Stack.Navigator 
+      initialRouteName='Product'
+      screenOptions={{
+        headerShown: false
+      }}
+    >
       <Stack.Screen 
         name="Product" 
         component={ProductScreen}
@@ -83,12 +88,16 @@ const ProductNavigator = () => {
 
 const CartNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName='Cart'>
+    <Stack.Navigator 
+      initialRouteName='Cart'
+      screenOptions={{
+        headerShown: true
+      }}
+    >
       <Stack.Screen 
         name="Cart" 
         component={CartScreen}
         options={{
-          title: 'Cart',
           headerStyle: {
             backgroundColor: colors.primary,
           },
@@ -113,13 +122,13 @@ const App: () => Node = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        initialRouteName="Product"
+        initialRouteName="ProductNavigator"
         activeColor={colors.primary}
         inactiveColor={colors.inactiveTab}
         barStyle={{ backgroundColor: colors.white }}
       >
         <Tab.Screen 
-          name="Product" 
+          name="ProductNavigator" 
           component={ProductNavigator} 
           options={{
             tabBarIcon: ({ focused }) => (
@@ -129,7 +138,7 @@ const App: () => Node = () => {
           }}
         />
         <Tab.Screen 
-          name="Cart" 
+          name="CartNavigator" 
           component={CartNavigator} 
           options={{
             tabBarIcon: ({ focused }) => (
